@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  On The Map
 //
-//  Created by sam on 10/13/17.
+//  Created by Patrick on 10/13/17.
 //  Copyright © 2017 CodeMobiles. All rights reserved.
 //
 
