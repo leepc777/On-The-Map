@@ -13,6 +13,9 @@ class ListTableViewController: UITableViewController {
 
     
     var locations:[[String:AnyObject]]!
+    
+    // setup UISearchController variable, you can't set UISearchController in StoryBoard
+    // here use same VC to search and show the result
     let searchController = UISearchController(searchResultsController: nil)
     var filteredData:[[String:AnyObject]]!
 
@@ -24,22 +27,34 @@ class ListTableViewController: UITableViewController {
         locations = MapClient.sharedInstance().locations
         
         // Setup the Search Controller
-        searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Search Map"
-        navigationItem.searchController = searchController //show searchbar in VC
+        searchController.searchResultsUpdater = self // set self as the deleagate
+        searchController.obscuresBackgroundDuringPresentation = false//table view can still scroll up/down when searching
+        searchController.searchBar.placeholder = "Search First Name"
+        
+        //this prevent view to hide search bar when keyboard shows up
+        searchController.hidesNavigationBarDuringPresentation = false
+//        searchController.dimsBackgroundDuringPresentation = true
+        
+        //make search bar show in naviationItem
+        navigationItem.searchController = searchController
+//        navigationItem.searchController?.searchBar.sizeToFit()
+        navigationItem.titleView = searchController.searchBar
         definesPresentationContext = true
+        
+       /* //more setup for search controller
+        let sarchBar = searchController.searchBar
+        searchBar.sizeToFit()
+        searchBar.placeholder = "Search for places"
+        self.navigationItem.titleView = searchController.searchBar
+        searchController.hidesNavigationBarDuringPresentation = false
+        searchController.dimsBackgroundDuringPresentation = true
+        definesPresentationContext = true
+         */
 
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
 
 
-    // MARK: - Table view data source
+    // MARK: - Table view data source delegate method
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
@@ -63,6 +78,7 @@ class ListTableViewController: UITableViewController {
         var dictionary:[String:AnyObject] = [:]
         var firstName=String()
         var lastName=String()
+        var mediaURL:String
         if isFiltering() {
             dictionary = filteredData[indexPath.row]
             
@@ -70,10 +86,12 @@ class ListTableViewController: UITableViewController {
             dictionary = locations[indexPath.row]
         }
         
-        firstName = (dictionary["firstName"] as? String)!
-        lastName = (dictionary["lastName"] as? String)!
-        cell.textLabel?.text = firstName+" "+lastName
-        cell.detailTextLabel?.text = dictionary["mediaURL"] as? String
+        if (dictionary["firstName"] == nil) {firstName=""} else { firstName = dictionary["firstName"] as! String }
+        if (dictionary["lastName"] == nil) {lastName=""} else {lastName = dictionary["lastName"] as! String}
+        if (dictionary["mediaURL"] == nil) {mediaURL=""} else{ mediaURL = dictionary["mediaURL"] as! String}
+        cell.textLabel?.text = "\(firstName) \(lastName)"
+//        cell.textLabel?.text = firstName+" "+lastName
+        cell.detailTextLabel?.text = mediaURL
 //        print("$$$    populate data to table cell: cellForRowAt :",dictionary!["mediaURL"]!)
         return cell
     }
@@ -89,18 +107,15 @@ class ListTableViewController: UITableViewController {
             dictionary = locations[indexPath.row]
         }
 
-        print("$$$   in didSelectRow, the dictionary is :",dictionary,"stringURL is:",dictionary["mediaURL"], type(of:dictionary["mediaURL"]))
+//        print("$$$   in didSelectRow, the dictionary is :",dictionary,"stringURL is:",dictionary["mediaURL"], type(of:dictionary["mediaURL"]))
 
         guard var stringURL = dictionary["mediaURL"] as? String else {
             print("$$$  stringuURL is nil")
             return
         }
         
-        // replacing www with https://www because seems openurl require URL star wtih http so it cant open like google.com or www.google.com
-//        if stringURL.hasPrefix("www") {
-//            print("$$$   stringURL starts with www instead of https://www ")
-//            stringURL=stringURL.replacingOccurrences(of: "www", with: "https://www")
-//        }
+        // replacing www with https://www because seems openurl require URL start wtih http so it cant open like google.com or www.google.com
+
         if !stringURL.hasPrefix("http") {
             stringURL = "https://"+stringURL
         }
@@ -114,12 +129,21 @@ class ListTableViewController: UITableViewController {
         
     }
     
+//    //MARK: Refresh Table
+//
+//    @IBAction func refreshTable(_ sender: UIBarButtonItem) {
+//        tableView.reloadData()
+//        print("$$$   refresh button got tapped and refresh viewTble")
+//    }
+
 }
 
+
+//  MARK: UISeawrController will call this delegate method when searching bar is 1stresponder.
+//ListTableVC is the delegate and conform UISearchResultsUpdating
 extension ListTableViewController: UISearchResultsUpdating {
 
-    
-    // MARK: - UISearchResultsUpdating Delegate
+    // MARK: - UISearchResultsUpdating Delegate Method
     func updateSearchResults(for searchController: UISearchController) {
         // TODO
         print("%%%   updateSearchResults() was called")
@@ -129,14 +153,12 @@ extension ListTableViewController: UISearchResultsUpdating {
     
     // MARK: - Private instance methods
     
-    func searchBarIsEmpty() -> Bool {
-        // Returns true if the text is empty or nil
-        print("%%%   searchBarIsEmpty() was called")
-        return searchController.searchBar.text?.isEmpty ?? true
-    }
+    /*
+    custom function to search/replace. be called in the delegate method updateSearchResults
+    to search the element of array and return that element when closre return true. here closure return trun when the element(a dictionary)  contains searchText
+   */
     
-    // search the element of array and return true when there is a hit  -candy.name contains searchText
-    func filterContentForSearchText(_ searchText: String, scope: String = "All") {
+    func filterContentForSearchText(_ searchText: String) {
         filteredData = self.locations.filter({( locationDictionary : [String:AnyObject]) -> Bool in
             guard let firstName = locationDictionary["firstName"] as? String else {
                 print("%%%   name is empty in locationDictionary")
@@ -150,9 +172,36 @@ extension ListTableViewController: UISearchResultsUpdating {
         print("%%%   filterContentForSearchText() was called")
     }
     
+    func searchBarIsEmpty() -> Bool {
+        // Returns true if the text is empty or nil
+        print("%%%   searchBarIsEmpty() was called")
+        return searchController.searchBar.text?.isEmpty ?? true
+    }
     func isFiltering() -> Bool {
         print("%%%   isFiltering() was called and return :",searchController.isActive && !searchBarIsEmpty())
         return searchController.isActive && !searchBarIsEmpty()
     }
+
+    /* this is for putting searching bar in the table view header. Not done yet
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        if searchBar.text == nil || searchBar.text == "" {
+            
+            inSearchMode = false
+            
+            view.endEditing(true)
+
+            
+            tableView.reloadData()
+            
+        } else {
+            
+            inSearchMode = true
+            
+            filteredData = data.filter({$0 == searchBar.text})
+            
+            tableView.reloadData()
+        }
+    } */
 
 }

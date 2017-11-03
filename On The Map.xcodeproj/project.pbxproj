@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		223BE1871F9CAAE900DF0AB1 /* UserInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 223BE1861F9CAAE900DF0AB1 /* UserInfoViewController.swift */; };
+		22105C251FA40796003E0FC6 /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22105C241FA40796003E0FC6 /* TabBarController.swift */; };
+		222999121FA4A2D80016D11A /* AddPinsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222999111FA4A2D80016D11A /* AddPinsViewController.swift */; };
 		224150471F91EC5700B661E9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224150461F91EC5700B661E9 /* AppDelegate.swift */; };
 		224150491F91EC5700B661E9 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224150481F91EC5700B661E9 /* LoginViewController.swift */; };
 		2241504C1F91EC5700B661E9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2241504A1F91EC5700B661E9 /* Main.storyboard */; };
@@ -18,10 +19,13 @@
 		2241505F1F9201BC00B661E9 /* MapClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2241505E1F9201BC00B661E9 /* MapClient.swift */; };
 		224150611F921CE600B661E9 /* MapConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224150601F921CE600B661E9 /* MapConstant.swift */; };
 		224150631F92405900B661E9 /* GCDBlackBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224150621F92405900B661E9 /* GCDBlackBox.swift */; };
+		22A82D851FA9495B0069DC6B /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A82D841FA9495B0069DC6B /* Reachability.swift */; };
+		22CD2FD01FAC6324000AD168 /* StudentInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22CD2FCF1FAC6324000AD168 /* StudentInfo.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		223BE1861F9CAAE900DF0AB1 /* UserInfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfoViewController.swift; sourceTree = "<group>"; };
+		22105C241FA40796003E0FC6 /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
+		222999111FA4A2D80016D11A /* AddPinsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPinsViewController.swift; sourceTree = "<group>"; };
 		224150431F91EC5700B661E9 /* On The Map.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "On The Map.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		224150461F91EC5700B661E9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		224150481F91EC5700B661E9 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
@@ -34,6 +38,9 @@
 		2241505E1F9201BC00B661E9 /* MapClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapClient.swift; sourceTree = "<group>"; };
 		224150601F921CE600B661E9 /* MapConstant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapConstant.swift; sourceTree = "<group>"; };
 		224150621F92405900B661E9 /* GCDBlackBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GCDBlackBox.swift; sourceTree = "<group>"; };
+		22A82D831FA9495B0069DC6B /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
+		22A82D841FA9495B0069DC6B /* Reachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
+		22CD2FCF1FAC6324000AD168 /* StudentInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentInfo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,15 +73,19 @@
 		224150451F91EC5700B661E9 /* On The Map */ = {
 			isa = PBXGroup;
 			children = (
+				22105C241FA40796003E0FC6 /* TabBarController.swift */,
 				2241505E1F9201BC00B661E9 /* MapClient.swift */,
 				224150461F91EC5700B661E9 /* AppDelegate.swift */,
 				224150601F921CE600B661E9 /* MapConstant.swift */,
 				224150481F91EC5700B661E9 /* LoginViewController.swift */,
+				22CD2FCF1FAC6324000AD168 /* StudentInfo.swift */,
+				22A82D831FA9495B0069DC6B /* Reachability.h */,
+				22A82D841FA9495B0069DC6B /* Reachability.swift */,
 				224150621F92405900B661E9 /* GCDBlackBox.swift */,
 				224150581F91F62C00B661E9 /* MapViewController.swift */,
-				223BE1861F9CAAE900DF0AB1 /* UserInfoViewController.swift */,
 				2241505A1F91F66F00B661E9 /* ListTableViewController.swift */,
 				2241504A1F91EC5700B661E9 /* Main.storyboard */,
+				222999111FA4A2D80016D11A /* AddPinsViewController.swift */,
 				2241504D1F91EC5700B661E9 /* Assets.xcassets */,
 				2241504F1F91EC5700B661E9 /* LaunchScreen.storyboard */,
 				224150521F91EC5700B661E9 /* Info.plist */,
@@ -155,12 +166,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				224150611F921CE600B661E9 /* MapConstant.swift in Sources */,
-				223BE1871F9CAAE900DF0AB1 /* UserInfoViewController.swift in Sources */,
 				224150491F91EC5700B661E9 /* LoginViewController.swift in Sources */,
+				22105C251FA40796003E0FC6 /* TabBarController.swift in Sources */,
 				224150591F91F62C00B661E9 /* MapViewController.swift in Sources */,
+				22CD2FD01FAC6324000AD168 /* StudentInfo.swift in Sources */,
 				224150471F91EC5700B661E9 /* AppDelegate.swift in Sources */,
 				2241505B1F91F66F00B661E9 /* ListTableViewController.swift in Sources */,
 				2241505F1F9201BC00B661E9 /* MapClient.swift in Sources */,
+				222999121FA4A2D80016D11A /* AddPinsViewController.swift in Sources */,
+				22A82D851FA9495B0069DC6B /* Reachability.swift in Sources */,
 				224150631F92405900B661E9 /* GCDBlackBox.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -19,70 +19,129 @@ class LoginViewController: UIViewController {
     var key:String!
     var website_url:String!
     var userInfo:[String:AnyObject]!
+    let reachability = Reachability()!
 //    var locations:[AnyObject]!
 //    var locations:[[String:AnyObject]]!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
     }
-
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        let reachability = Reachability()!
+        
+        //declare this inside of viewWillAppear
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(reachabilityChanged), name: .reachabilityChanged, object: reachability)
+        do{
+            try reachability.startNotifier()
+        }catch{
+            print("could not start reachability notifier")
+        }
+        
+        
+    }
+    
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        reachability.stopNotifier()
+        NotificationCenter.default.removeObserver(self, name: .reachabilityChanged, object: reachability)
+    }
+    
+    @objc func reachabilityChanged(note: Notification) {
+        
+        let reachability = note.object as! Reachability
+        
+        switch reachability.connection {
+        case .wifi:
+//            displayError("Reachable via WiFi")
+            print("%%%   Reachable via WiFi")
+        case .cellular:
+            print("%%%   Reachable via Cellular")
+        case .none:
+            print("%%%   Network not reachable")
+//            displayError("Network not reachable")
+        }
+    }
+    
     @IBAction func loginPressed(_ sender: Any) {
         
-//        MapClient.sharedInstance().UdacityGetSession(userName: nameTextField.text!, passWord: passwordTextField.text!) {(xxx)->Void in
-        
         // get session from udacity , need to provide userName and passWord
-        MapClient.sharedInstance().UdacityGetSession(userName: "leepc777@gmail.com", passWord: "2114550a") {(returnData)->Void in
 
-            print("%%%%  VC got the data",returnData)
-            let account = returnData["account"] as? [String:AnyObject]
-//            self.key = account!["key"] as! String
-            MapClient.sharedInstance().key = account!["key"] as! String
+        MapClient.sharedInstance().UdacityGetSession(userName: nameTextField.text!, passWord: passwordTextField.text!) {(returnData,error)->Void in
+        
+//        MapClient.sharedInstance().UdacityGetSession(userName: "", passWord: "") {(returnData)->Void in
+        
+
+            print("%%%%  VC request Udacity Session and got return data",returnData)
+            guard let returnData = returnData else {
+                let errorLocalized = error?.localizedDescription
+                print("$$$$    dataTask failed,\(String(describing: errorLocalized))")
+                performUIUpdatesOnMain {
+                    let error = errorLocalized
+                    self.displayError(error!)
+                }
+                return
+            }
+            
+            guard let account = returnData["account"] as? [String:AnyObject] else {
+                performUIUpdatesOnMain {
+                    let error = returnData["error"]!
+                    self.displayError(error as! String)
+                }
+                return
+            }
+            
+            //Get Key
+            MapClient.sharedInstance().key = account["key"] as! String
             self.key = MapClient.sharedInstance().key
             print("%%% the key is",self.key)
             
             //kill session after login
             MapClient.sharedInstance().UdacityDelSession()
             
-            //get public user data from Udacity , need to provide user's KEY
+            //get public user data from Udacity,need to provide KEY
             MapClient.sharedInstance().UdacityPublicUserData(key: self.key) { (returnData) in
-                MapClient.sharedInstance().userInfo = returnData
+//                MapClient.sharedInstance().userInfo = returnData
                 self.userInfo = returnData
-                print("%%%  VC got the user info",self.userInfo)
+//                print("%%%  VC got the user info",self.userInfo)
                 
                 // get multiple locationS from Parse
                 MapClient.sharedInstance().parseGetLocations() {(returnData)->Void in
                     let arrayReturn = returnData
-//                    self.locations = arrayReturn!["results"] as? [AnyObject]
-//                    self.locations = arrayReturn!["results"] as? [[String:AnyObject]]
-//                    MapClient.sharedInstance().locations = self.locations
                     MapClient.sharedInstance().locations = arrayReturn["results"] as? [[String:AnyObject]]
-
-//                    print("%%%  VC got the Locations",self.locations)
                     
-                performUIUpdatesOnMain {
-                    self.debugTextView.text = "self.userInfo as? String"
-                    self.completeLogin()
-                    self.debugTextView.text = "self.userInfo as? String"
-
+                    let results = arrayReturn["results"] as? [[String:AnyObject]]
+                    MapClient.sharedInstance().studentLocations = Student.infoFromResults(results!)
+                    print("@@@   use Stuct to store return students info",MapClient.sharedInstance().studentLocations)
+                    
+                    //                    print("%%%  VC got the Locations",self.locations)
+                    
+                    performUIUpdatesOnMain {
+                        self.completeLogin()
+                    }
                 }
             }
-            }
-            
-//            performUIUpdatesOnMain {
-//                self.completeLogin()
-//            }
         }
     }
     
     
     // MARK: Login
     private func completeLogin() {
-        self.debugTextView.text = "you are in completetion()"
         let controller = storyboard!.instantiateViewController(withIdentifier: "MapNavigationController") as! UINavigationController
         present(controller, animated: true, completion: nil)
     }
     
+    
+    // Display Error
+    func displayError(_ error: String) {
+        self.debugTextView.text = " Login Failed. \n \(String(describing: error))"
+        print("$$$   ",error)
+        
+    }
+
 
 }
 
