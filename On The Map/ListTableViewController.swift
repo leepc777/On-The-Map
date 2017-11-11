@@ -11,31 +11,35 @@ import UIKit
 class ListTableViewController: UITableViewController {
 //    class ListTableViewController: UITableViewController,UISearchBarDelegate, UISearchDisplayDelegate {
 
-    
-    var locations:[[String:AnyObject]]!
-    
-    // setup UISearchController variable, you can't set UISearchController in StoryBoard
-    // here use same VC to search and show the result
-    let searchController = UISearchController(searchResultsController: nil)
-    var filteredData:[[String:AnyObject]]!
+    // MARK: setup UISearchController in same VC
+    // you can't set UISearchController in StoryBoard
 
-//    var isFiltering() = false
-    
+    let searchController = UISearchController(searchResultsController: nil)
+    var filteredDataNew:[Student]!
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        locations = MapClient.sharedInstance().locations
+        
+////        let barViewControllers = self.tabBarController?.viewControllers
+////        let tableVC = barViewControllers![1] as! ListTableViewController
+        
+//        let barViewControllers = self.tabBarController?.viewControllers
+//        print("$$$$ print barViewControllers is \(barViewControllers) ")
+//        let tableVC = barViewControllers![1] as! ListTableViewController
+//        tableVC.refreshTable()
+        
         
         // Setup the Search Controller
         searchController.searchResultsUpdater = self // set self as the deleagate
         searchController.obscuresBackgroundDuringPresentation = false//table view can still scroll up/down when searching
         searchController.searchBar.placeholder = "Search First Name"
         
-        //this prevent view to hide search bar when keyboard shows up
+        //Don't hide search bar when keyboard shows up
         searchController.hidesNavigationBarDuringPresentation = false
 //        searchController.dimsBackgroundDuringPresentation = true
         
-        //make search bar show in naviationItem
+        //Show search bar in naviationItem
         navigationItem.searchController = searchController
 //        navigationItem.searchController?.searchBar.sizeToFit()
         navigationItem.titleView = searchController.searchBar
@@ -53,6 +57,19 @@ class ListTableViewController: UITableViewController {
 
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+//        tableView.reloadData()
+        refreshTable()
+        print("&&&   tableView viewWillAppear got called")
+    }
+    
+//
+//    override func viewDidAppear(_ animated: Bool) {
+//        self.tableView.reloadData()
+//        print("$$$$    TableViewVC viewDidAppear got called        ")
+//    }
+
 
     // MARK: - Table view data source delegate method
 
@@ -64,78 +81,60 @@ class ListTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        print("%%%  numberOfRowsInSection was called, the tableView is:",tableView,"setction is :",section,"location count:",locations.count)
+        print("%%%  numberOfRowsInSection was called, the tableView is:",tableView,"setction is :",section)
         if isFiltering() {
-            return filteredData.count
+            return filteredDataNew.count
         }
-        return locations.count
+        return MapClient.sharedInstance().studentLocations.count
     }
 
   
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "tableViewCell", for: indexPath)
         // Configure the cell...
-        var dictionary:[String:AnyObject] = [:]
-        var firstName=String()
-        var lastName=String()
-        var mediaURL:String
+        var dictionaryNew:Student!
         if isFiltering() {
-            dictionary = filteredData[indexPath.row]
-            
+            dictionaryNew = filteredDataNew[indexPath.row]
         } else {
-            dictionary = locations[indexPath.row]
+            dictionaryNew = MapClient.sharedInstance().studentLocations[indexPath.row]
         }
         
-        if (dictionary["firstName"] == nil) {firstName=""} else { firstName = dictionary["firstName"] as! String }
-        if (dictionary["lastName"] == nil) {lastName=""} else {lastName = dictionary["lastName"] as! String}
-        if (dictionary["mediaURL"] == nil) {mediaURL=""} else{ mediaURL = dictionary["mediaURL"] as! String}
-        cell.textLabel?.text = "\(firstName) \(lastName)"
-//        cell.textLabel?.text = firstName+" "+lastName
-        cell.detailTextLabel?.text = mediaURL
+        
 //        print("$$$    populate data to table cell: cellForRowAt :",dictionary!["mediaURL"]!)
+        cell.textLabel?.text = "\(dictionaryNew.firstName) \(dictionaryNew.lastName)"
+        cell.detailTextLabel?.text = dictionaryNew.url
         return cell
     }
     
     // after tapping the cell, read out and open url
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 //        let dictionary = locations[indexPath.row]
-        var dictionary:[String:AnyObject] = [:]
+        var dictionaryNew:Student!
         if isFiltering() {
-            dictionary = filteredData[indexPath.row]
-            
+            dictionaryNew = filteredDataNew[indexPath.row]
         } else {
-            dictionary = locations[indexPath.row]
-        }
-
-//        print("$$$   in didSelectRow, the dictionary is :",dictionary,"stringURL is:",dictionary["mediaURL"], type(of:dictionary["mediaURL"]))
-
-        guard var stringURL = dictionary["mediaURL"] as? String else {
-            print("$$$  stringuURL is nil")
-            return
+            dictionaryNew = MapClient.sharedInstance().studentLocations[indexPath.row]
         }
         
-        // replacing www with https://www because seems openurl require URL start wtih http so it cant open like google.com or www.google.com
+        //deselect the row
+        tableView.deselectRow(at: indexPath, animated: true)
+//        print("$$$   in didSelectRow, the dictionary is :",dictionary,"stringURL is:",dictionary["mediaURL"], type(of:dictionary["mediaURL"]))
+
+        
+        var stringURL = dictionaryNew.url
+        // replacing www with https://www seems openurl cant open like google.com or www.google.com
 
         if !stringURL.hasPrefix("http") {
             stringURL = "https://"+stringURL
         }
-        guard let url = URL(string:stringURL) else {
-//        guard let url = URL(string:"https://www.udacity.com") else {
-
-            print("$$$  URL() return NIL")
-            return
+        UIApplication.shared.open(URL(string:stringURL)!, options: [:], completionHandler: nil)
         }
-        UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        
+    
+    func refreshTable() {
+        print("$$$   refreshTable func got called,current VC: is \(self)")
+        tableView.reloadData()
     }
     
-//    //MARK: Refresh Table
-//
-//    @IBAction func refreshTable(_ sender: UIBarButtonItem) {
-//        tableView.reloadData()
-//        print("$$$   refresh button got tapped and refresh viewTble")
-//    }
-
 }
 
 
@@ -147,7 +146,7 @@ extension ListTableViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         // TODO
         print("%%%   updateSearchResults() was called")
-        filterContentForSearchText(searchController.searchBar.text!)
+        filterContentForSearchTextNew(searchController.searchBar.text!)
         
     }
     
@@ -158,18 +157,15 @@ extension ListTableViewController: UISearchResultsUpdating {
     to search the element of array and return that element when closre return true. here closure return trun when the element(a dictionary)  contains searchText
    */
     
-    func filterContentForSearchText(_ searchText: String) {
-        filteredData = self.locations.filter({( locationDictionary : [String:AnyObject]) -> Bool in
-            guard let firstName = locationDictionary["firstName"] as? String else {
-                print("%%%   name is empty in locationDictionary")
-                return false
-            }
-            
-            return firstName.lowercased().contains(searchText.lowercased())
+    
+    func filterContentForSearchTextNew(_ searchText: String) {
+        filteredDataNew = MapClient.sharedInstance().studentLocations.filter({( studentLocation : Student) -> Bool in
+           
+            return studentLocation.firstName.lowercased().contains(searchText.lowercased())
         })
         
         tableView.reloadData()
-        print("%%%   filterContentForSearchText() was called")
+        print("%%%   filterContentForSearchTextNew() was called")
     }
     
     func searchBarIsEmpty() -> Bool {

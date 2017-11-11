@@ -8,6 +8,7 @@
 
 import Foundation
 
+    // read in dirctionary and store 6 elements
     struct Student {
         var key : String
         var firstName : String
@@ -16,13 +17,26 @@ import Foundation
         var lat : Double
         var lon : Double
         
+        // remove nil in return data
         init(dictionary: [String:AnyObject]) {
-            key = dictionary["uniqueKey"] as! String
-            firstName = dictionary["firstName"] as! String
-            lastName = dictionary["lastName"] as! String
-            url = dictionary["mediaURL"] as! String
-            lat = dictionary["latitude"] as! Double
-            lon = dictionary["longitude"] as! Double
+            if (dictionary["uniqueKey"] == nil) {key=""} else {
+                key = dictionary["uniqueKey"] as! String
+            }
+            if (dictionary["firstName"] == nil) {firstName=""} else {
+                firstName = dictionary["firstName"] as! String
+            }
+            if (dictionary["lastName"] == nil) {lastName=""} else {
+                lastName = dictionary["lastName"] as! String
+            }
+            if (dictionary["mediaURL"] == nil) {url=""} else {
+                url = dictionary["mediaURL"] as! String
+            }
+            if (dictionary["latitude"] == nil) {lat=0} else {
+                lat = dictionary["latitude"] as! Double
+            }
+            if (dictionary["longitude"] == nil) {lon=0} else {
+                lon = dictionary["longitude"] as! Double
+            }
         }
         
         static func infoFromResults(_ results: [[String:AnyObject]]) -> [Student] {
@@ -34,3 +48,14 @@ import Foundation
         }
     }
 
+// store personal info from Udacity
+struct Personal {
+    
+    var key = String()
+    var lastName = String()
+    var firstName = String()
+    var lat = Double()
+    var lon = Double()
+    var url = String()
+    
+}

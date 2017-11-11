@@ -15,13 +15,9 @@ class LoginViewController: UIViewController {
     @IBOutlet weak var loginButton: UIButton!
     @IBOutlet weak var debugTextView: UITextView!
     
-    var name:String!
-    var key:String!
-    var website_url:String!
-    var userInfo:[String:AnyObject]!
     let reachability = Reachability()!
-//    var locations:[AnyObject]!
-//    var locations:[[String:AnyObject]]!
+    var activityIndicator = UIActivityIndicatorView()
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,18 +27,14 @@ class LoginViewController: UIViewController {
         super.viewWillAppear(animated)
         let reachability = Reachability()!
         
-        //declare this inside of viewWillAppear
-        
+        //set Reachability
         NotificationCenter.default.addObserver(self, selector: #selector(reachabilityChanged), name: .reachabilityChanged, object: reachability)
         do{
             try reachability.startNotifier()
         }catch{
             print("could not start reachability notifier")
         }
-        
-        
     }
-    
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
@@ -68,53 +60,87 @@ class LoginViewController: UIViewController {
     
     @IBAction func loginPressed(_ sender: Any) {
         
-        // get session from udacity , need to provide userName and passWord
+        // MARK: get session from udacity
+        //need to provide userName and passWord
 
-        MapClient.sharedInstance().UdacityGetSession(userName: nameTextField.text!, passWord: passwordTextField.text!) {(returnData,error)->Void in
-        
-//        MapClient.sharedInstance().UdacityGetSession(userName: "", passWord: "") {(returnData)->Void in
-        
+        //set up indicator
+        activityIndicator.center = self.view.center
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.activityIndicatorViewStyle = .gray
+        view.addSubview(activityIndicator)
+        activityIndicator.startAnimating()
+        UIApplication.shared.beginIgnoringInteractionEvents()
 
+        
+//        MapClient.sharedInstance().UdacityGetSession(userName: nameTextField.text!, passWord: passwordTextField.text!) {(returnData,error)->Void in
+
+        MapClient.sharedInstance().UdacityGetSession(userName: "leepc777@gmail.com", passWord: "2114550a") {(returnData,error)->Void in
+            
+            performUIUpdatesOnMain {
+                self.activityIndicator.stopAnimating()
+                UIApplication.shared.endIgnoringInteractionEvents()
+            }
+                    
             print("%%%%  VC request Udacity Session and got return data",returnData)
+            
+            // report error from dataTask. internet connection issues
             guard let returnData = returnData else {
-                let errorLocalized = error?.localizedDescription
-                print("$$$$    dataTask failed,\(String(describing: errorLocalized))")
+                let errorLocalized = error?.localizedDescription as! String
+                print("$$$$    dataTask failed at getting session,\(String(describing: errorLocalized)),\(error)")
                 performUIUpdatesOnMain {
                     let error = errorLocalized
-                    self.displayError(error!)
+                    self.displayError("Login Failed: \(String(describing: error))!")
                 }
                 return
             }
             
+            // report wrong account/password
             guard let account = returnData["account"] as? [String:AnyObject] else {
                 performUIUpdatesOnMain {
-                    let error = returnData["error"]!
-                    self.displayError(error as! String)
+                    let error = returnData["error"] as! String
+                    self.displayError("Login Failed : \(error)")
                 }
                 return
             }
             
-            //Get Key
-            MapClient.sharedInstance().key = account["key"] as! String
-            self.key = MapClient.sharedInstance().key
-            print("%%% the key is",self.key)
+            //MARK: Get Key
+            MapClient.sharedInstance().userInfo.key = account["key"] as! String
+            let key = MapClient.sharedInstance().userInfo.key
+            print("%%% the key is",key)
             
-            //kill session after login
-            MapClient.sharedInstance().UdacityDelSession()
+            //MARK: kill session after login
+//            MapClient.sharedInstance().UdacityDelSession()
             
             //get public user data from Udacity,need to provide KEY
-            MapClient.sharedInstance().UdacityPublicUserData(key: self.key) { (returnData) in
+            MapClient.sharedInstance().UdacityPublicUserData(key: key) { (returnData) in
 //                MapClient.sharedInstance().userInfo = returnData
-                self.userInfo = returnData
+//                self.userInfo = returnData
 //                print("%%%  VC got the user info",self.userInfo)
                 
-                // get multiple locationS from Parse
-                MapClient.sharedInstance().parseGetLocations() {(returnData)->Void in
-                    let arrayReturn = returnData
-                    MapClient.sharedInstance().locations = arrayReturn["results"] as? [[String:AnyObject]]
+                // MARK: get multiple locationS from Parse
+                MapClient.sharedInstance().parseGetLocations() {(returnData,error)->Void in
                     
-                    let results = arrayReturn["results"] as? [[String:AnyObject]]
-                    MapClient.sharedInstance().studentLocations = Student.infoFromResults(results!)
+                    //report error from dataTask
+                    guard let returnData = returnData else {
+                        let errorLocalized = error?.localizedDescription as! String
+                        print("$$$$    dataTask failed at getting locations,\(String(describing: errorLocalized))")
+                        performUIUpdatesOnMain {
+                            self.displayError("dataTask failed to get locations: \n \(errorLocalized)")
+                        }
+                        return
+                    }
+                    
+                    print("@@@   the returnData for rquesting students:",returnData)
+                    
+                    //report error message inside the return data
+                    guard let results = returnData["results"] as? [[String:AnyObject]] else {
+                        performUIUpdatesOnMain {
+                            let error = returnData["error"] as! String
+                            self.displayError("Failed to get Locations : \(error)")
+                        }
+                        return
+                    }
+                    MapClient.sharedInstance().studentLocations = Student.infoFromResults(results)
                     print("@@@   use Stuct to store return students info",MapClient.sharedInstance().studentLocations)
                     
                     //                    print("%%%  VC got the Locations",self.locations)
@@ -137,11 +163,17 @@ class LoginViewController: UIViewController {
     
     // Display Error
     func displayError(_ error: String) {
-        self.debugTextView.text = " Login Failed. \n \(String(describing: error))"
-        print("$$$   ",error)
+//        self.debugTextView.text = "\n \(String(describing: error))"
+        let alert = UIAlertController(title: "Message", message: error, preferredStyle: UIAlertControllerStyle.alert)
+        
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: { (actionHandler) in
+            alert.dismiss(animated: true, completion: nil)
+        }))
+        self.present(alert, animated: true, completion: nil)
+        
+//        print("$$$   ",error)
         
     }
-
-
+    
 }
 
