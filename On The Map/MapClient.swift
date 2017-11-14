@@ -19,7 +19,93 @@ class MapClient : NSObject {
     // user info ( one person )
     var userInfo = Personal()
 
+    
+    func login (userName:String,passWord:String,loginCompletionHandler:@escaping (_ success: Bool, _ errorString: String?) -> Void){
         
+        //MARK: GetSession and Get Key
+        MapClient.sharedInstance().UdacityGetSession(userName: userName, passWord: passWord) {(returnData,error)->Void in
+            
+            print("%%%%  VC request Udacity Session and got return data",returnData)
+            
+            // report error from dataTask. internet connection issues
+            guard let returnData = returnData else {
+                let errorLocalized = error?.localizedDescription as! String
+                print("$$$$    dataTask failed at getting session,\(String(describing: errorLocalized)),\(error)")
+//                performUIUpdatesOnMain {
+//                    let error = errorLocalized
+//                    self.displayError("Login Failed: \(String(describing: error))!")
+//                }
+                loginCompletionHandler(false, errorLocalized)
+                return
+            }
+            
+            // report wrong account/password
+            guard let account = returnData["account"] as? [String:AnyObject] else {
+//                performUIUpdatesOnMain {
+//                    let error = returnData["error"] as! String
+//                    self.displayError("Login Failed : \(error)")
+//                }
+                let errorString = returnData["error"] as! String
+                loginCompletionHandler(false, errorString)
+                return
+            }
+            
+            
+            MapClient.sharedInstance().userInfo.key = account["key"] as! String
+            let key = MapClient.sharedInstance().userInfo.key
+            print("%%% the key is",key)
+            
+            //MARK: kill session after login
+            //            MapClient.sharedInstance().UdacityDelSession()
+            
+            //get public user data from Udacity,need to provide KEY
+            MapClient.sharedInstance().UdacityPublicUserData(key: key) { (returnData) in
+                //                MapClient.sharedInstance().userInfo = returnData
+                //                self.userInfo = returnData
+                //                print("%%%  VC got the user info",self.userInfo)
+                
+                // MARK: get multiple locationS from Parse
+                MapClient.sharedInstance().parseGetLocations() {(returnData,error)->Void in
+                    
+                    //report error from dataTask
+                    guard let returnData = returnData else {
+                        let errorLocalized = error?.localizedDescription as! String
+                        print("$$$$    dataTask failed at getting locations,\(String(describing: errorLocalized))")
+//                        performUIUpdatesOnMain {
+//                            self.displayError("dataTask failed to get locations: \n \(errorLocalized)")
+//                        }
+                        loginCompletionHandler(false, errorLocalized)
+                        return
+                    }
+                    
+                    print("@@@   the returnData for rquesting students:",returnData)
+                    
+                    //report error message inside the return data
+                    guard let results = returnData["results"] as? [[String:AnyObject]] else {
+//                        performUIUpdatesOnMain {
+//                            let error = returnData["error"] as! String
+//                            self.displayError("Failed to get Locations : \(error)")
+//                        }
+                        let errorString = returnData["error"] as! String
+                        loginCompletionHandler(false, errorString)
+                        return
+                    }
+                    MapClient.sharedInstance().studentLocations = Student.infoFromResults(results)
+                    print("@@@   use Stuct to store return students info",MapClient.sharedInstance().studentLocations)
+                    
+                    //                    print("%%%  VC got the Locations",self.locations)
+                    
+//                    performUIUpdatesOnMain {
+//                        self.completeLogin()
+//                    }
+                    loginCompletionHandler(true, nil)
+                }
+            }
+        }
+    }
+    
+    
+    
     // MARK: Udacity get a session
     func UdacityGetSession(userName:String,passWord:String,UdacityGetSessionCompletionHandler:@escaping ([String:AnyObject]?,Error?)->Void) {
         
@@ -115,7 +201,7 @@ class MapClient : NSObject {
 
     // MARK: Parse API : get multiple student locations
     func parseGetLocations(parseGetLocationsCompletionHandler: @escaping ([String:AnyObject]?,Error?)->Void) {
-        let request = NSMutableURLRequest(url: URL(string: "https://parse.udacity.com/parse/classes/StudentLocation?limit=3&order=-updatedAt")!)
+        let request = NSMutableURLRequest(url: URL(string: "https://parse.udacity.com/parse/classes/StudentLocation?limit=100&order=-updatedAt")!)
         request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
         request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
         let session = URLSession.shared

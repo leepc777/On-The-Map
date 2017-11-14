@@ -15,7 +15,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        let tbvc = self.tabBarController as! TabBarController
+        tbvc.myDelegateMap = self
+//        self.tabBarController?.navigationController?.hidesBarsOnTap = true
         
         // creat a array of Class MKPointAnnotation() to store information. each element is a student
 //        var annotations = [MKPointAnnotation()]
@@ -117,6 +119,30 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    
-
 }
+
+extension MapViewController : RefreshTab {
+    func refresh() {
+        print("$$$   delegate method refresh got called,current VC: is \(self)")
+        performUIUpdatesOnMain {
+            print("&&&&    delegat method refresh in MapVC got call ")
+            //        mapView.reloadInputViews()
+            var annotationsNew = [MKPointAnnotation]()
+            // looping the array locations and store the information to MKPointAnnotation() Type array
+            
+            //MARK: set up annotations with [Struct] array instead
+            for studentLocation in MapClient.sharedInstance().studentLocations {
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = CLLocationCoordinate2D(latitude: studentLocation.lat, longitude: studentLocation.lon)
+                annotation.title = "\(studentLocation.firstName) \(studentLocation.lastName)"
+                annotation.subtitle = studentLocation.url
+                // Finally we place the annotation in an array of annotations.
+                annotationsNew.append(annotation)
+            }
+            self.mapView.removeAnnotations(self.mapView.annotations)
+            self.mapView.addAnnotations(annotationsNew)
+
+        }
+    }
+}
+

@@ -20,6 +20,10 @@ class ListTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let tbvc = self.tabBarController as! TabBarController
+        tbvc.myDelegateTable = self
+//        tbvc.navigationController?.setToolbarHidden(true, animated: true)
+//        subscribeToNotification(.UIViewControllerShowDetailTargetDidChange, selector: #selector(self.refreshTable))
         
 ////        let barViewControllers = self.tabBarController?.viewControllers
 ////        let tableVC = barViewControllers![1] as! ListTableViewController
@@ -33,7 +37,7 @@ class ListTableViewController: UITableViewController {
         // Setup the Search Controller
         searchController.searchResultsUpdater = self // set self as the deleagate
         searchController.obscuresBackgroundDuringPresentation = false//table view can still scroll up/down when searching
-        searchController.searchBar.placeholder = "Search First Name"
+        searchController.searchBar.placeholder = "Search Name"
         
         //Don't hide search bar when keyboard shows up
         searchController.hidesNavigationBarDuringPresentation = false
@@ -62,6 +66,16 @@ class ListTableViewController: UITableViewController {
 //        tableView.reloadData()
         refreshTable()
         print("&&&   tableView viewWillAppear got called")
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        print("&&&,    tableView viewWillDisappear got called")
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        print("&&&,    tableView viewDidlDisappear got called")
     }
     
 //
@@ -130,7 +144,8 @@ class ListTableViewController: UITableViewController {
         UIApplication.shared.open(URL(string:stringURL)!, options: [:], completionHandler: nil)
         }
     
-    func refreshTable() {
+    // MARK: custom func to reload table
+    @objc func refreshTable() {
         print("$$$   refreshTable func got called,current VC: is \(self)")
         tableView.reloadData()
     }
@@ -160,8 +175,10 @@ extension ListTableViewController: UISearchResultsUpdating {
     
     func filterContentForSearchTextNew(_ searchText: String) {
         filteredDataNew = MapClient.sharedInstance().studentLocations.filter({( studentLocation : Student) -> Bool in
-           
-            return studentLocation.firstName.lowercased().contains(searchText.lowercased())
+           let name = studentLocation.firstName + studentLocation.lastName
+            return name.lowercased().contains(searchText.lowercased())
+//            return studentLocation.firstName.lowercased().contains(searchText.lowercased())
+
         })
         
         tableView.reloadData()
@@ -201,3 +218,29 @@ extension ListTableViewController: UISearchResultsUpdating {
     } */
 
 }
+ /* set up notification
+private extension ListTableViewController {
+    func subscribeToNotification(_ notification: NSNotification.Name, selector: Selector) {
+        NotificationCenter.default.addObserver(self, selector: selector, name: notification, object: nil)
+    }
+    func unsubscribeFromAllNotifications() {
+        NotificationCenter.default.removeObserver(self)
+    }
+}
+*/
+
+protocol RefreshTab {
+    func refresh()
+}
+
+extension ListTableViewController : RefreshTab {
+    func refresh() {
+            print("$$$   delegate method refresh got called,current VC: is \(self)")
+        performUIUpdatesOnMain {
+            self.tableView.reloadData()
+        }
+    }
+}
+
+
+

@@ -8,7 +8,12 @@
 
 import UIKit
 
+
+
 class TabBarController: UITabBarController {
+    
+    var myDelegateTable:RefreshTab?=nil
+    var myDelegateMap:RefreshTab?=nil
 
     var activityIndicator = UIActivityIndicatorView()
     
@@ -35,10 +40,10 @@ class TabBarController: UITabBarController {
                 self.activityIndicator.stopAnimating()
                 UIApplication.shared.endIgnoringInteractionEvents()
                 
-                //change root to tab bar controller.
+                /*//change root to tab bar controller.
                 let mainStoryboard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
                 let rootVC = mainStoryboard.instantiateViewController(withIdentifier: "MapNavigationController") as! UINavigationController
-                UIApplication.shared.keyWindow?.rootViewController = rootVC
+                UIApplication.shared.keyWindow?.rootViewController = rootVC */
             }
             guard let returnData = returnData else {
                 let errorLocalized = error?.localizedDescription
@@ -53,7 +58,11 @@ class TabBarController: UITabBarController {
             }
             
             MapClient.sharedInstance().studentLocations = Student.infoFromResults(results)
-            self.dismiss(animated: true, completion: nil)
+            
+            self.navigationController?.popToRootViewController(animated: true)
+
+            
+//            self.dismiss(animated: true, completion: nil)
             
 ////            let whoIsSelected = self.tabBarController?.selectedIndex
             print("@@@   refresh button got taped. the current VC is: \(self) , ")
@@ -67,8 +76,15 @@ class TabBarController: UITabBarController {
             let selectedVC = self.selectedViewController
             let selectedIndex = self.selectedIndex
             let barViewControllers = self.viewControllers
+            let sss = selectedVC!
+            let vc = self.viewControllers![1]
+            vc.resignFirstResponder()
+            
 
-            print("$$$$ print barViewControllers is \(barViewControllers) ",selectedVC,selectedIndex)
+            print("$$$$ print barViewControllers is \(barViewControllers) ",selectedVC,sss,selectedIndex,vc)
+            self.myDelegateTable?.refresh()
+            self.myDelegateMap?.refresh()
+            
 //            let tableVC = barViewControllers![1] as! ListTableViewController
 //            tableVC.refreshTable()
 
@@ -124,13 +140,12 @@ class TabBarController: UITabBarController {
 
     
     @IBAction func logOut(_ sender: Any) {
-        let mainStoryboard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-        let rootVC = mainStoryboard.instantiateViewController(withIdentifier: "loginVC") as! UIViewController
-        UIApplication.shared.keyWindow?.rootViewController = rootVC
-        MapClient.sharedInstance().UdacityDelSession() //delete session
+//        let mainStoryboard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+//        let rootVC = mainStoryboard.instantiateViewController(withIdentifier: "loginVC") as! UIViewController
+//        UIApplication.shared.keyWindow?.rootViewController = rootVC
+//        MapClient.sharedInstance().UdacityDelSession() //delete session
         dismiss(animated: true, completion: nil)
     }
-    
-
-    
 }
+
+

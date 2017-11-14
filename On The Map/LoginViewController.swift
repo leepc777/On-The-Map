@@ -72,6 +72,32 @@ class LoginViewController: UIViewController {
         UIApplication.shared.beginIgnoringInteractionEvents()
 
         
+//        MapClient.sharedInstance().login(userName: nameTextField.text!, passWord: passwordTextField.text!) {(success,errorString)->Void in
+        
+        MapClient.sharedInstance().login(userName: "leepc777@gmail.com", passWord: "2114550a") {(success,errorString)->Void in
+
+        
+            performUIUpdatesOnMain {
+                self.activityIndicator.stopAnimating()
+                UIApplication.shared.endIgnoringInteractionEvents()
+
+                if success {
+                    self.completeLogin()
+                } else {
+                    self.displayError(errorString!)
+                }
+
+            }
+            
+        }
+        
+        
+        
+        
+        
+        
+        
+        /*
 //        MapClient.sharedInstance().UdacityGetSession(userName: nameTextField.text!, passWord: passwordTextField.text!) {(returnData,error)->Void in
 
         MapClient.sharedInstance().UdacityGetSession(userName: "leepc777@gmail.com", passWord: "2114550a") {(returnData,error)->Void in
@@ -150,7 +176,7 @@ class LoginViewController: UIViewController {
                     }
                 }
             }
-        }
+        } */
     }
     
     
