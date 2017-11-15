@@ -62,9 +62,9 @@ class AddPinsViewController: UIViewController,UITextFieldDelegate,MKMapViewDeleg
             var annotations : [MKPointAnnotation] = []
             self.newInfo.lat = location.coordinate.latitude
             self.newInfo.lon = location.coordinate.longitude
-            self.newInfo.key = MapClient.sharedInstance().userInfo.key
-            self.newInfo.firstName = MapClient.sharedInstance().userInfo.firstName
-            self.newInfo.lastName = MapClient.sharedInstance().userInfo.lastName
+            self.newInfo.key = MapClientData.sharedInstance().userInfo.key
+            self.newInfo.firstName = MapClientData.sharedInstance().userInfo.firstName
+            self.newInfo.lastName = MapClientData.sharedInstance().userInfo.lastName
             self.newInfo.url = self.urlTextField.text!
 
 //            print("$$$$  \(self.newInfo.lat) \(self.newInfo.lon)",error,placemarks,location)
@@ -90,6 +90,7 @@ class AddPinsViewController: UIViewController,UITextFieldDelegate,MKMapViewDeleg
         self.dismiss(animated: true, completion: nil)
     }
     
+    //to hide keyboard after tapping return
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
     textField.resignFirstResponder()
     return true
@@ -199,6 +200,10 @@ class AddPinsViewController: UIViewController,UITextFieldDelegate,MKMapViewDeleg
         }))
         
         self.present(alert, animated: true, completion: nil)
+    }
+
+    deinit {
+        print("&&&&&  AddPinsViewController got delocated  ")
     }
 
 }

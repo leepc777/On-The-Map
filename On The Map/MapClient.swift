@@ -13,11 +13,12 @@ import Foundation
 
 class MapClient : NSObject {
 
-    // students info (100 students)
-    var studentLocations : [Student]!
     
-    // user info ( one person )
-    var userInfo = Personal()
+//    // students info (100 students)
+//    var studentLocations : [Student]!
+//
+//    // user info ( one person )
+//    var userInfo = Personal()
 
     
     func login (userName:String,passWord:String,loginCompletionHandler:@escaping (_ success: Bool, _ errorString: String?) -> Void){
@@ -31,74 +32,58 @@ class MapClient : NSObject {
             guard let returnData = returnData else {
                 let errorLocalized = error?.localizedDescription as! String
                 print("$$$$    dataTask failed at getting session,\(String(describing: errorLocalized)),\(error)")
-//                performUIUpdatesOnMain {
-//                    let error = errorLocalized
-//                    self.displayError("Login Failed: \(String(describing: error))!")
-//                }
                 loginCompletionHandler(false, errorLocalized)
                 return
             }
             
             // report wrong account/password
             guard let account = returnData["account"] as? [String:AnyObject] else {
-//                performUIUpdatesOnMain {
-//                    let error = returnData["error"] as! String
-//                    self.displayError("Login Failed : \(error)")
-//                }
                 let errorString = returnData["error"] as! String
                 loginCompletionHandler(false, errorString)
                 return
             }
             
             
-            MapClient.sharedInstance().userInfo.key = account["key"] as! String
-            let key = MapClient.sharedInstance().userInfo.key
+            MapClientData.sharedInstance().userInfo.key = account["key"] as! String
+            let key = MapClientData.sharedInstance().userInfo.key
             print("%%% the key is",key)
             
-            //MARK: kill session after login
-            //            MapClient.sharedInstance().UdacityDelSession()
             
-            //get public user data from Udacity,need to provide KEY
+            //MARK: get public user data from Udacity,KEY as input
             MapClient.sharedInstance().UdacityPublicUserData(key: key) { (returnData) in
-                //                MapClient.sharedInstance().userInfo = returnData
-                //                self.userInfo = returnData
-                //                print("%%%  VC got the user info",self.userInfo)
                 
                 // MARK: get multiple locationS from Parse
-                MapClient.sharedInstance().parseGetLocations() {(returnData,error)->Void in
+                MapClient.sharedInstance().parseGetLocations() {(success,errorString)->Void in
                     
+                    if success {
+                        loginCompletionHandler(true, nil)
+                    }
+                    else {
+                        loginCompletionHandler(false,errorString)
+                    }
+                    /*
                     //report error from dataTask
                     guard let returnData = returnData else {
                         let errorLocalized = error?.localizedDescription as! String
-                        print("$$$$    dataTask failed at getting locations,\(String(describing: errorLocalized))")
-//                        performUIUpdatesOnMain {
-//                            self.displayError("dataTask failed to get locations: \n \(errorLocalized)")
-//                        }
+//                        print("$$$$    dataTask failed at getting locations,\(String(describing: errorLocalized))")
                         loginCompletionHandler(false, errorLocalized)
                         return
                     }
                     
-                    print("@@@   the returnData for rquesting students:",returnData)
+//                    print("@@@   the returnData for rquesting students:",returnData)
                     
                     //report error message inside the return data
                     guard let results = returnData["results"] as? [[String:AnyObject]] else {
-//                        performUIUpdatesOnMain {
-//                            let error = returnData["error"] as! String
-//                            self.displayError("Failed to get Locations : \(error)")
-//                        }
                         let errorString = returnData["error"] as! String
                         loginCompletionHandler(false, errorString)
                         return
                     }
-                    MapClient.sharedInstance().studentLocations = Student.infoFromResults(results)
-                    print("@@@   use Stuct to store return students info",MapClient.sharedInstance().studentLocations)
+                    MapClientData.sharedInstance().studentLocations = Student.infoFromResults(results)
+                    print("@@@   use Stuct to store return students info",MapClientData.sharedInstance().studentLocations)
                     
-                    //                    print("%%%  VC got the Locations",self.locations)
-                    
-//                    performUIUpdatesOnMain {
-//                        self.completeLogin()
-//                    }
                     loginCompletionHandler(true, nil)
+                    */
+ 
                 }
             }
         }
@@ -119,9 +104,9 @@ class MapClient : NSObject {
             
             
             if error != nil { // Handle error…
-                let errorMessage = error?.localizedDescription
-                let errorDebug = error.debugDescription
-                self.displayError ("$$$  get a session fail,\(error),\(errorMessage),\(errorDebug)")
+//                let errorMessage = error?.localizedDescription
+//                let errorDebug = error.debugDescription
+//                self.displayError ("$$$  get a session fail,\(error),\(errorMessage),\(errorDebug)")
                 UdacityGetSessionCompletionHandler(nil,error)
                     return
                 }
@@ -188,10 +173,10 @@ class MapClient : NSObject {
             //Parse Data
             let finalData = self.parseJSON(data: newData)
             let userData = finalData["user"] as? [String:AnyObject]
-            self.userInfo.lastName = userData!["last_name"] as! String
-            self.userInfo.firstName = userData!["first_name"] as! String
-            self.userInfo.key = userData!["key"] as! String
-            UdacityPublicUserDataCompletionHandler(self.userInfo) //pass clean data to closure
+            MapClientData.sharedInstance().userInfo.lastName = userData!["last_name"] as! String
+            MapClientData.sharedInstance().userInfo.firstName = userData!["first_name"] as! String
+            MapClientData.sharedInstance().userInfo.key = userData!["key"] as! String
+            UdacityPublicUserDataCompletionHandler(MapClientData.sharedInstance().userInfo) //pass clean data to closure
 
 //            print("$$$  public personal info from Udacity, firstName, LastName, Key", self.firstName,self.lastName,self.key,finalData)
 //            print("&&&   Udacity API get personal public Data",NSString(data: newData!, encoding: String.Encoding.utf8.rawValue)!)
@@ -200,24 +185,33 @@ class MapClient : NSObject {
     }
 
     // MARK: Parse API : get multiple student locations
-    func parseGetLocations(parseGetLocationsCompletionHandler: @escaping ([String:AnyObject]?,Error?)->Void) {
+    func parseGetLocations(parseGetLocationsCompletionHandler: @escaping (_ success: Bool, _ errorString: String?)->Void) {
         let request = NSMutableURLRequest(url: URL(string: "https://parse.udacity.com/parse/classes/StudentLocation?limit=100&order=-updatedAt")!)
         request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
         request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
         let session = URLSession.shared
         let task = session.dataTask(with: request as URLRequest) { data, response, error in
-            if error != nil { // Handle error...
-                self.displayError ("$$$  failed to get multiple locations ")
+////            print(NSString(data: data!, encoding: String.Encoding.utf8.rawValue)!)
+            
+            //report error from dataTask, internet connection issues
+            guard let data = data else {
                 let errorLocalized = error?.localizedDescription as! String
-                parseGetLocationsCompletionHandler(nil,error)
-                print("$$$  error from dataTask and localized error ",error,errorLocalized)
+                parseGetLocationsCompletionHandler(false, errorLocalized)
                 return
             }
-//            print(NSString(data: data!, encoding: String.Encoding.utf8.rawValue)!)
+
             
             //Parse data
-            let finalData = self.parseJSON(data: data!)
-            parseGetLocationsCompletionHandler(finalData,nil)
+            let finalData = self.parseJSON(data: data)
+            
+            //report error message inside the return data
+            guard let results = finalData["results"] as? [[String:AnyObject]] else {
+                let errorString = finalData["error"] as! String
+                parseGetLocationsCompletionHandler(false, errorString)
+                return
+            }
+            MapClientData.sharedInstance().studentLocations = Student.infoFromResults(results)
+            parseGetLocationsCompletionHandler(true,nil)
         }
         task.resume()
 
@@ -238,7 +232,7 @@ class MapClient : NSObject {
                 createInfoCompletionHandler(nil,error)
                 return
             }
-            print("&&&  call NSMutableURLRequest to create info for a student  ", self.userInfo.firstName,self.userInfo.lastName,self.userInfo.key,data!,NSString(data: data!, encoding: String.Encoding.utf8.rawValue)!)
+            print("&&&  call NSMutableURLRequest to create info for a student  ", MapClientData.sharedInstance().userInfo.firstName,MapClientData.sharedInstance().userInfo.lastName,MapClientData.sharedInstance().userInfo.key,data!,NSString(data: data!, encoding: String.Encoding.utf8.rawValue)!)
 //            let dataEncoding = NSString(data: data!, encoding: String.Encoding.utf8.rawValue)!
             
             //Parse Data
@@ -250,12 +244,24 @@ class MapClient : NSObject {
         task.resume()
     }
 
-    // Display Error
-    
+     //Display Error
+
     func displayError(_ error: String) {
         print("$$$   ",error)
-        
+
     }
+    
+//    // Display Error in Alert
+//    func displayError(_ error: String) {
+//        let alert = UIAlertController(title: "Message", message: error, preferredStyle: UIAlertControllerStyle.alert)
+//
+//        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: { (actionHandler) in
+//            alert.dismiss(animated: true, completion: nil)
+//        }))
+//        self.present(alert, animated: true, completion: nil)
+//
+//    }
+
     
     // Parse JSON data
     
@@ -271,7 +277,6 @@ class MapClient : NSObject {
         return parsedResult
     }
     // MARK: Shared Instance
-    
     class func sharedInstance() -> MapClient {
         struct Singleton {
             static var sharedInstance = MapClient()

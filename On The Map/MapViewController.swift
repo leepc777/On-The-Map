@@ -20,36 +20,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
 //        self.tabBarController?.navigationController?.hidesBarsOnTap = true
         
         // creat a array of Class MKPointAnnotation() to store information. each element is a student
-//        var annotations = [MKPointAnnotation()]
-//        var annotationsNew = [MKPointAnnotation]()
-//        // looping the array locations and store the information to MKPointAnnotation() Type array
-//
-//        //MARK: set up annotations with [Struct] array instead
-//        for studentLocation in MapClient.sharedInstance().studentLocations {
-//            let annotation = MKPointAnnotation()
-//            annotation.coordinate = CLLocationCoordinate2D(latitude: studentLocation.lat, longitude: studentLocation.lon)
-//            annotation.title = "\(studentLocation.firstName) \(studentLocation.lastName)"
-//            annotation.subtitle = studentLocation.url
-//            // Finally we place the annotation in an array of annotations.
-//            annotationsNew.append(annotation)
-//        }
-//
-//
-//        // When the array is complete, we add the annotations to the map.
-//        // MARK: add array of pins to map(var annotations : [MKPointAnnotation()])
-//        mapView.addAnnotations(annotationsNew)
-//
-//        print("####    in MapViewController , mapView.annotations is ", mapView.annotations)
-    }
-    // want to refresh the Pins on map with every time when MapView shows
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-//        mapView.reloadInputViews()
+//      //  var annotations = [MKPointAnnotation()]
         var annotationsNew = [MKPointAnnotation]()
         // looping the array locations and store the information to MKPointAnnotation() Type array
-        
+
         //MARK: set up annotations with [Struct] array instead
-        for studentLocation in MapClient.sharedInstance().studentLocations {
+        for studentLocation in MapClientData.sharedInstance().studentLocations {
             let annotation = MKPointAnnotation()
             annotation.coordinate = CLLocationCoordinate2D(latitude: studentLocation.lat, longitude: studentLocation.lon)
             annotation.title = "\(studentLocation.firstName) \(studentLocation.lastName)"
@@ -57,11 +33,22 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             // Finally we place the annotation in an array of annotations.
             annotationsNew.append(annotation)
         }
-        mapView.removeAnnotations(mapView.annotations)
-        mapView.addAnnotations(annotationsNew)
 
-        print("&&&   MapView viewWillAppear got called")
+
+        // When the array is complete, we add the annotations to the map.
+        // MARK: add array of pins to map(var annotations : [MKPointAnnotation()])
+        mapView.addAnnotations(annotationsNew)
+//
+//        print("####    in MapViewController , mapView.annotations is ", mapView.annotations)
     }
+    
+    
+    
+//    // refresh the Pins on map with every time when MapView shows
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//        print("&&&   MapView viewWillAppear got called")
+//    }
     
     
     // MARK: - MKMapViewDelegate
@@ -111,6 +98,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 }
                 guard let url = URL(string:stringURL) else {
                     print("$$$  URL() return NIL")
+                    displayError("Not a valid URL")
                     return
                 }
                 app.open(url, options: [:], completionHandler: nil)
@@ -119,6 +107,16 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
+    // Display Error in Alert
+    func displayError(_ error: String) {
+        let alert = UIAlertController(title: "Message", message: error, preferredStyle: UIAlertControllerStyle.alert)
+        
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: { (actionHandler) in
+            alert.dismiss(animated: true, completion: nil)
+        }))
+        self.present(alert, animated: true, completion: nil)
+        
+    }
 }
 
 extension MapViewController : RefreshTab {
@@ -131,7 +129,7 @@ extension MapViewController : RefreshTab {
             // looping the array locations and store the information to MKPointAnnotation() Type array
             
             //MARK: set up annotations with [Struct] array instead
-            for studentLocation in MapClient.sharedInstance().studentLocations {
+            for studentLocation in MapClientData.sharedInstance().studentLocations {
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = CLLocationCoordinate2D(latitude: studentLocation.lat, longitude: studentLocation.lon)
                 annotation.title = "\(studentLocation.firstName) \(studentLocation.lastName)"
@@ -144,5 +142,6 @@ extension MapViewController : RefreshTab {
 
         }
     }
+    
 }
 

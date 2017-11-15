@@ -22,13 +22,13 @@ import Foundation
             if (dictionary["uniqueKey"] == nil) {key=""} else {
                 key = dictionary["uniqueKey"] as! String
             }
-            if (dictionary["firstName"] == nil) {firstName=""} else {
+            if (dictionary["firstName"] == nil) {firstName="No First Name"} else {
                 firstName = dictionary["firstName"] as! String
             }
-            if (dictionary["lastName"] == nil) {lastName=""} else {
+            if (dictionary["lastName"] == nil) {lastName="No Last Name"} else {
                 lastName = dictionary["lastName"] as! String
             }
-            if (dictionary["mediaURL"] == nil) {url=""} else {
+            if (dictionary["mediaURL"] == nil) {url="No Media URL"} else {
                 url = dictionary["mediaURL"] as! String
             }
             if (dictionary["latitude"] == nil) {lat=0} else {

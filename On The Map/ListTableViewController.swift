@@ -12,14 +12,15 @@ class ListTableViewController: UITableViewController {
 //    class ListTableViewController: UITableViewController,UISearchBarDelegate, UISearchDisplayDelegate {
 
     // MARK: setup UISearchController in same VC
-    // you can't set UISearchController in StoryBoard
+    // can't set UISearchController in StoryBoard
 
     let searchController = UISearchController(searchResultsController: nil)
-    var filteredDataNew:[Student]!
+//    var filteredDataNew:[Student]!
 
     
     override func viewDidLoad() {
         super.viewDidLoad()
+//        refreshTable()
         let tbvc = self.tabBarController as! TabBarController
         tbvc.myDelegateTable = self
 //        tbvc.navigationController?.setToolbarHidden(true, animated: true)
@@ -59,12 +60,15 @@ class ListTableViewController: UITableViewController {
         definesPresentationContext = true
          */
 
+        
+
     }
 
+    /* life cycle for debug
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 //        tableView.reloadData()
-        refreshTable()
+//        refreshTable()
         print("&&&   tableView viewWillAppear got called")
     }
     
@@ -78,11 +82,11 @@ class ListTableViewController: UITableViewController {
         print("&&&,    tableView viewDidlDisappear got called")
     }
     
-//
-//    override func viewDidAppear(_ animated: Bool) {
-//        self.tableView.reloadData()
-//        print("$$$$    TableViewVC viewDidAppear got called        ")
-//    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        //self.tableView.reloadData()
+        print("$$$$    TableViewVC viewDidAppear got called        ")
+    } */
 
 
     // MARK: - Table view data source delegate method
@@ -97,9 +101,9 @@ class ListTableViewController: UITableViewController {
         // #warning Incomplete implementation, return the number of rows
         print("%%%  numberOfRowsInSection was called, the tableView is:",tableView,"setction is :",section)
         if isFiltering() {
-            return filteredDataNew.count
+            return MapClientData.sharedInstance().filteredDataNew.count
         }
-        return MapClient.sharedInstance().studentLocations.count
+        return MapClientData.sharedInstance().studentLocations.count
     }
 
   
@@ -108,9 +112,9 @@ class ListTableViewController: UITableViewController {
         // Configure the cell...
         var dictionaryNew:Student!
         if isFiltering() {
-            dictionaryNew = filteredDataNew[indexPath.row]
+            dictionaryNew = MapClientData.sharedInstance().filteredDataNew[indexPath.row]
         } else {
-            dictionaryNew = MapClient.sharedInstance().studentLocations[indexPath.row]
+            dictionaryNew = MapClientData.sharedInstance().studentLocations[indexPath.row]
         }
         
         
@@ -122,34 +126,52 @@ class ListTableViewController: UITableViewController {
     
     // after tapping the cell, read out and open url
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        let dictionary = locations[indexPath.row]
+        //        let dictionary = locations[indexPath.row]
         var dictionaryNew:Student!
         if isFiltering() {
-            dictionaryNew = filteredDataNew[indexPath.row]
+            dictionaryNew = MapClientData.sharedInstance().filteredDataNew[indexPath.row]
         } else {
-            dictionaryNew = MapClient.sharedInstance().studentLocations[indexPath.row]
+            dictionaryNew = MapClientData.sharedInstance().studentLocations[indexPath.row]
         }
         
         //deselect the row
         tableView.deselectRow(at: indexPath, animated: true)
-//        print("$$$   in didSelectRow, the dictionary is :",dictionary,"stringURL is:",dictionary["mediaURL"], type(of:dictionary["mediaURL"]))
-
+        //        print("$$$   in didSelectRow, the dictionary is :",dictionary,"stringURL is:",dictionary["mediaURL"], type(of:dictionary["mediaURL"]))
         
+        let app = UIApplication.shared
         var stringURL = dictionaryNew.url
-        // replacing www with https://www seems openurl cant open like google.com or www.google.com
-
         if !stringURL.hasPrefix("http") {
             stringURL = "https://"+stringURL
         }
-        UIApplication.shared.open(URL(string:stringURL)!, options: [:], completionHandler: nil)
+        guard let url = URL(string:stringURL) else {
+            print("$$$  URL() return NIL")
+            displayError("Not a valid URL")
+            return
         }
-    
-    // MARK: custom func to reload table
-    @objc func refreshTable() {
-        print("$$$   refreshTable func got called,current VC: is \(self)")
-        tableView.reloadData()
+        app.open(url, options: [:], completionHandler: nil)
     }
     
+//    // MARK: custom func to reload table
+//    @objc func refreshTable() {
+//        print("$$$   refreshTable func got called,current VC: is \(self)")
+//        tableView.reloadData()
+//    }
+    
+    // Display Error in Alert
+    func displayError(_ error: String) {
+        let alert = UIAlertController(title: "Message", message: error, preferredStyle: UIAlertControllerStyle.alert)
+        
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: { (actionHandler) in
+            alert.dismiss(animated: true, completion: nil)
+        }))
+        self.present(alert, animated: true, completion: nil)
+        
+    }
+    
+    deinit {
+        print("&&&&&  TableViewController got delocated  &&&&&")
+    }
+
 }
 
 
@@ -174,10 +196,9 @@ extension ListTableViewController: UISearchResultsUpdating {
     
     
     func filterContentForSearchTextNew(_ searchText: String) {
-        filteredDataNew = MapClient.sharedInstance().studentLocations.filter({( studentLocation : Student) -> Bool in
+        MapClientData.sharedInstance().filteredDataNew = MapClientData.sharedInstance().studentLocations.filter({( studentLocation : Student) -> Bool in
            let name = studentLocation.firstName + studentLocation.lastName
             return name.lowercased().contains(searchText.lowercased())
-//            return studentLocation.firstName.lowercased().contains(searchText.lowercased())
 
         })
         
@@ -191,7 +212,7 @@ extension ListTableViewController: UISearchResultsUpdating {
         return searchController.searchBar.text?.isEmpty ?? true
     }
     func isFiltering() -> Bool {
-        print("%%%   isFiltering() was called and return :",searchController.isActive && !searchBarIsEmpty())
+//        print("%%%   isFiltering() was called and return :",searchController.isActive && !searchBarIsEmpty())
         return searchController.isActive && !searchBarIsEmpty()
     }
 

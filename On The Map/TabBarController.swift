@@ -33,41 +33,28 @@ class TabBarController: UITabBarController {
         UIApplication.shared.beginIgnoringInteractionEvents()
         
         // refresh button to get locations form cloud
-        MapClient.sharedInstance().parseGetLocations() {(returnData,error)->Void in
+        MapClient.sharedInstance().parseGetLocations() {(success,errorString)->Void in
             
             // stop indicator
             performUIUpdatesOnMain {
                 self.activityIndicator.stopAnimating()
                 UIApplication.shared.endIgnoringInteractionEvents()
-                
-                /*//change root to tab bar controller.
-                let mainStoryboard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                let rootVC = mainStoryboard.instantiateViewController(withIdentifier: "MapNavigationController") as! UINavigationController
-                UIApplication.shared.keyWindow?.rootViewController = rootVC */
             }
-            guard let returnData = returnData else {
-                let errorLocalized = error?.localizedDescription
-                print("$$$$    dataTask failed at getting locations,\(String(describing: errorLocalized))")
+            
+            guard success else {
+                performUIUpdatesOnMain {
+                    self.displayError(errorString!)
+                }
                 return
             }
-            
-            print("@@@   the returnData for rquesting students:",returnData)
-            
-            guard let results = returnData["results"] as? [[String:AnyObject]] else {
-                return
-            }
-            
-            MapClient.sharedInstance().studentLocations = Student.infoFromResults(results)
             
             self.navigationController?.popToRootViewController(animated: true)
 
             
-//            self.dismiss(animated: true, completion: nil)
             
-////            let whoIsSelected = self.tabBarController?.selectedIndex
             print("@@@   refresh button got taped. the current VC is: \(self) , ")
 
-            
+//            let whoIsSelected = self.tabBarController?.selectedIndex
 //            let selectedVC = self.tabBarController?.selectedViewController
 //            let selectedIndex = self.tabBarController?.selectedIndex
 //            let barViewControllers = self.tabBarController?.viewControllers
@@ -88,16 +75,6 @@ class TabBarController: UITabBarController {
 //            let tableVC = barViewControllers![1] as! ListTableViewController
 //            tableVC.refreshTable()
 
-//            performUIUpdatesOnMain {
-//                let tableVC = ListTableViewController()
-//                tableVC.refreshTable()
-//                self.view.addSubview(tableVC)
-//            }
-            
-            
-//            self.tabBar.reloadInputViews()
-//            self.refresh((Any).self)
-
         }
 
     }
@@ -105,20 +82,35 @@ class TabBarController: UITabBarController {
     @IBAction func addPins(_ sender: Any) {
         
         // Check if current studentLocations has the user's data already.
-        for student in MapClient.sharedInstance().studentLocations {
-            if student.key == MapClient.sharedInstance().userInfo.key {
-                showAlert(title: "Update ?", message: "\(MapClient.sharedInstance().userInfo.firstName) \(MapClient.sharedInstance().userInfo.lastName), overwrite URL and Location ?")
-            } else {
-                let controller = self.storyboard!.instantiateViewController(withIdentifier: "AddPinsNavigationController") as! UINavigationController
-                self.present(controller, animated: true, completion: nil)
+        print("####     addPins got tapped      ####")
+        var repeatData = 0
+        for student in MapClientData.sharedInstance().studentLocations {
+            if student.key == MapClientData.sharedInstance().userInfo.key {
+                repeatData += 1
+                print("####   found the old data   ####")
+                //                showAlert(title: "Update ?", message: "\(MapClientData.sharedInstance().userInfo.firstName) \(MapClientData.sharedInstance().userInfo.lastName), overwrite URL and Location ?")
+                //            } else {
+                ////                let controller = self.storyboard!.instantiateViewController(withIdentifier: "AddPinsNavigationController") as! UINavigationController
+                //                let controller = self.storyboard!.instantiateViewController(withIdentifier: "addPinsViewController") as! AddPinsViewController
+                //                self.present(controller, animated: true, completion: nil)
+                ////                self.navigationController?.pushViewController(controller, animated: true)
+                //            }
             }
         }
-//        let controller = self.storyboard!.instantiateViewController(withIdentifier: "AddPinsNavigationController") as! UINavigationController
-//        self.present(controller, animated: true, completion: nil)
+        if repeatData != 0 {
+            print("####   found the old data   ####")
+            self.showAlert(title: "Update ?", message: "\(MapClientData.sharedInstance().userInfo.firstName) \(MapClientData.sharedInstance().userInfo.lastName), overwrite URL and Location ?")
+        } else {
+            let controller = self.storyboard!.instantiateViewController(withIdentifier: "AddPinsNavigationController") as! UINavigationController
+
+//            let controller = self.storyboard!.instantiateViewController(withIdentifier: "addPinsViewController") as! AddPinsViewController
+            self.present(controller, animated: true, completion: nil)
+        }
     }
     
     //Alert view for user to confirm overwrite
     func showAlert (title:String,message:String) {
+        print("#####    showAlert got called in tableView   ####")
         let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.alert)
         alert.addAction(UIAlertAction(title: "NO", style: UIAlertActionStyle.default, handler: { (actionHandler) in
             alert.dismiss(animated: true, completion: nil)
@@ -127,7 +119,10 @@ class TabBarController: UITabBarController {
         alert.addAction(UIAlertAction(title: "YES", style: UIAlertActionStyle.default, handler: { (actionHandler) in
             
             let controller = self.storyboard!.instantiateViewController(withIdentifier: "AddPinsNavigationController") as! UINavigationController
+//            let controller = self.storyboard!.instantiateViewController(withIdentifier: "addPinsViewController") as! AddPinsViewController
+
             self.present(controller, animated: true, completion: nil)
+//            self.navigationController?.pushViewController(controller, animated: true)
 
             alert.dismiss(animated: true, completion: nil)
             
@@ -135,7 +130,7 @@ class TabBarController: UITabBarController {
         
         
         self.present(alert, animated: true, completion: nil)
-        print("####   showAlert got called")
+//        print("####   showAlert got called")
     }
 
     
@@ -143,9 +138,21 @@ class TabBarController: UITabBarController {
 //        let mainStoryboard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
 //        let rootVC = mainStoryboard.instantiateViewController(withIdentifier: "loginVC") as! UIViewController
 //        UIApplication.shared.keyWindow?.rootViewController = rootVC
-//        MapClient.sharedInstance().UdacityDelSession() //delete session
+        MapClient.sharedInstance().UdacityDelSession() //delete session
         dismiss(animated: true, completion: nil)
     }
+    
+    // Display Error
+    func displayError(_ error: String) {
+        let alert = UIAlertController(title: "Message", message: error, preferredStyle: UIAlertControllerStyle.alert)
+        
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: { (actionHandler) in
+            alert.dismiss(animated: true, completion: nil)
+        }))
+        self.present(alert, animated: true, completion: nil)
+        
+    }
+
 }
 
 

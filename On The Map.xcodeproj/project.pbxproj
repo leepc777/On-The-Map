@@ -19,6 +19,7 @@
 		2241505F1F9201BC00B661E9 /* MapClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2241505E1F9201BC00B661E9 /* MapClient.swift */; };
 		224150611F921CE600B661E9 /* MapConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224150601F921CE600B661E9 /* MapConstant.swift */; };
 		224150631F92405900B661E9 /* GCDBlackBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224150621F92405900B661E9 /* GCDBlackBox.swift */; };
+		224628A71FBBC9F8001B3078 /* MapClientData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224628A61FBBC9F8001B3078 /* MapClientData.swift */; };
 		22A82D851FA9495B0069DC6B /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A82D841FA9495B0069DC6B /* Reachability.swift */; };
 		22CD2FD01FAC6324000AD168 /* StudentInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22CD2FCF1FAC6324000AD168 /* StudentInfo.swift */; };
 /* End PBXBuildFile section */
@@ -38,6 +39,7 @@
 		2241505E1F9201BC00B661E9 /* MapClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapClient.swift; sourceTree = "<group>"; };
 		224150601F921CE600B661E9 /* MapConstant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapConstant.swift; sourceTree = "<group>"; };
 		224150621F92405900B661E9 /* GCDBlackBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GCDBlackBox.swift; sourceTree = "<group>"; };
+		224628A61FBBC9F8001B3078 /* MapClientData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapClientData.swift; sourceTree = "<group>"; };
 		22A82D831FA9495B0069DC6B /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		22A82D841FA9495B0069DC6B /* Reachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		22CD2FCF1FAC6324000AD168 /* StudentInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentInfo.swift; sourceTree = "<group>"; };
@@ -75,6 +77,7 @@
 			children = (
 				22105C241FA40796003E0FC6 /* TabBarController.swift */,
 				2241505E1F9201BC00B661E9 /* MapClient.swift */,
+				224628A61FBBC9F8001B3078 /* MapClientData.swift */,
 				224150461F91EC5700B661E9 /* AppDelegate.swift */,
 				224150601F921CE600B661E9 /* MapConstant.swift */,
 				224150481F91EC5700B661E9 /* LoginViewController.swift */,
@@ -170,6 +173,7 @@
 				22105C251FA40796003E0FC6 /* TabBarController.swift in Sources */,
 				224150591F91F62C00B661E9 /* MapViewController.swift in Sources */,
 				22CD2FD01FAC6324000AD168 /* StudentInfo.swift in Sources */,
+				224628A71FBBC9F8001B3078 /* MapClientData.swift in Sources */,
 				224150471F91EC5700B661E9 /* AppDelegate.swift in Sources */,
 				2241505B1F91F66F00B661E9 /* ListTableViewController.swift in Sources */,
 				2241505F1F9201BC00B661E9 /* MapClient.swift in Sources */,
