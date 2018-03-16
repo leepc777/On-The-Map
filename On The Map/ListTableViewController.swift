@@ -2,7 +2,7 @@
 //  ListTableViewController.swift
 //  On The Map
 //
-//  Created by sam on 10/14/17.
+//  Created by Patrick on 10/14/17.
 //  Copyright © 2017 CodeMobiles. All rights reserved.
 //
 
@@ -14,25 +14,13 @@ class ListTableViewController: UITableViewController {
     // MARK: setup UISearchController in same VC
     // can't set UISearchController in StoryBoard
 
-    let searchController = UISearchController(searchResultsController: nil)
-//    var filteredDataNew:[Student]!
+    let searchController = UISearchController(searchResultsController: nil) // this means this is single VC opertion. No other VC to show search results
 
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        refreshTable()
         let tbvc = self.tabBarController as! TabBarController
         tbvc.myDelegateTable = self
-//        tbvc.navigationController?.setToolbarHidden(true, animated: true)
-//        subscribeToNotification(.UIViewControllerShowDetailTargetDidChange, selector: #selector(self.refreshTable))
-        
-////        let barViewControllers = self.tabBarController?.viewControllers
-////        let tableVC = barViewControllers![1] as! ListTableViewController
-        
-//        let barViewControllers = self.tabBarController?.viewControllers
-//        print("$$$$ print barViewControllers is \(barViewControllers) ")
-//        let tableVC = barViewControllers![1] as! ListTableViewController
-//        tableVC.refreshTable()
         
         
         // Setup the Search Controller
@@ -64,30 +52,6 @@ class ListTableViewController: UITableViewController {
 
     }
 
-    /* life cycle for debug
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-//        tableView.reloadData()
-//        refreshTable()
-        print("&&&   tableView viewWillAppear got called")
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        print("&&&,    tableView viewWillDisappear got called")
-    }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        print("&&&,    tableView viewDidlDisappear got called")
-    }
-    
-
-    override func viewDidAppear(_ animated: Bool) {
-        //self.tableView.reloadData()
-        print("$$$$    TableViewVC viewDidAppear got called        ")
-    } */
-
 
     // MARK: - Table view data source delegate method
 
@@ -118,7 +82,6 @@ class ListTableViewController: UITableViewController {
         }
         
         
-//        print("$$$    populate data to table cell: cellForRowAt :",dictionary!["mediaURL"]!)
         cell.textLabel?.text = "\(dictionaryNew.firstName) \(dictionaryNew.lastName)"
         cell.detailTextLabel?.text = dictionaryNew.url
         return cell
@@ -126,7 +89,6 @@ class ListTableViewController: UITableViewController {
     
     // after tapping the cell, read out and open url
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //        let dictionary = locations[indexPath.row]
         var dictionaryNew:Student!
         if isFiltering() {
             dictionaryNew = MapClientData.sharedInstance().filteredDataNew[indexPath.row]
@@ -151,12 +113,6 @@ class ListTableViewController: UITableViewController {
         app.open(url, options: [:], completionHandler: nil)
     }
     
-//    // MARK: custom func to reload table
-//    @objc func refreshTable() {
-//        print("$$$   refreshTable func got called,current VC: is \(self)")
-//        tableView.reloadData()
-//    }
-    
     // Display Error in Alert
     func displayError(_ error: String) {
         let alert = UIAlertController(title: "Message", message: error, preferredStyle: UIAlertControllerStyle.alert)
@@ -169,7 +125,7 @@ class ListTableViewController: UITableViewController {
     }
     
     deinit {
-        print("&&&&&  TableViewController got delocated  &&&&&")
+        print("&&&&&  TableViewController got deallocated  &&&&&")
     }
 
 }
@@ -191,7 +147,7 @@ extension ListTableViewController: UISearchResultsUpdating {
     
     /*
     custom function to search/replace. be called in the delegate method updateSearchResults
-    to search the element of array and return that element when closre return true. here closure return trun when the element(a dictionary)  contains searchText
+    to search the element of array and return that element when closure return true. here closure return true when the element(a dictionary) contains searchText
    */
     
     
@@ -203,12 +159,12 @@ extension ListTableViewController: UISearchResultsUpdating {
         })
         
         tableView.reloadData()
-        print("%%%   filterContentForSearchTextNew() was called")
+//        print("%%%   filterContentForSearchTextNew() was called")
     }
     
     func searchBarIsEmpty() -> Bool {
         // Returns true if the text is empty or nil
-        print("%%%   searchBarIsEmpty() was called")
+//        print("%%%   searchBarIsEmpty() was called")
         return searchController.searchBar.text?.isEmpty ?? true
     }
     func isFiltering() -> Bool {
@@ -216,47 +172,22 @@ extension ListTableViewController: UISearchResultsUpdating {
         return searchController.isActive && !searchBarIsEmpty()
     }
 
-    /* this is for putting searching bar in the table view header. Not done yet
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        
-        if searchBar.text == nil || searchBar.text == "" {
-            
-            inSearchMode = false
-            
-            view.endEditing(true)
-
-            
-            tableView.reloadData()
-            
-        } else {
-            
-            inSearchMode = true
-            
-            filteredData = data.filter({$0 == searchBar.text})
-            
-            tableView.reloadData()
-        }
-    } */
 
 }
- /* set up notification
-private extension ListTableViewController {
-    func subscribeToNotification(_ notification: NSNotification.Name, selector: Selector) {
-        NotificationCenter.default.addObserver(self, selector: selector, name: notification, object: nil)
-    }
-    func unsubscribeFromAllNotifications() {
-        NotificationCenter.default.removeObserver(self)
-    }
-}
-*/
-
 protocol RefreshTab {
     func refresh()
 }
 
 extension ListTableViewController : RefreshTab {
     func refresh() {
-            print("$$$   delegate method refresh got called,current VC: is \(self)")
+            print("$$$   delegate method refresh in tableView got called,current VC: is \(self)")
+        performUIUpdatesOnMain {
+            self.tableView.reloadData()
+        }
+    }
+    
+      func refreshStatic() {
+        print("$$$   refershStatic in tableView got called,current VC: is \(self)")
         performUIUpdatesOnMain {
             self.tableView.reloadData()
         }

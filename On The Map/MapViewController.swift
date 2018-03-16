@@ -26,6 +26,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
 
         //MARK: set up annotations with [Struct] array instead
         for studentLocation in MapClientData.sharedInstance().studentLocations {
+        // [Class] also works fine.
+//        for studentLocation in MapClientData.sharedInstance().studentlocationsClass {
+        
             let annotation = MKPointAnnotation()
             annotation.coordinate = CLLocationCoordinate2D(latitude: studentLocation.lat, longitude: studentLocation.lon)
             annotation.title = "\(studentLocation.firstName) \(studentLocation.lastName)"
@@ -38,17 +41,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         // When the array is complete, we add the annotations to the map.
         // MARK: add array of pins to map(var annotations : [MKPointAnnotation()])
         mapView.addAnnotations(annotationsNew)
-//
 //        print("####    in MapViewController , mapView.annotations is ", mapView.annotations)
     }
     
-    
-    
-//    // refresh the Pins on map with every time when MapView shows
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//        print("&&&   MapView viewWillAppear got called")
-//    }
     
     
     // MARK: - MKMapViewDelegate
@@ -75,17 +70,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         return pinView
     }
     
-    
-    // MARK: This delegate method is implemented to respond to taps. It opens the system browser
-    // to the URL specified in the annotationViews subtitle property.
-    
-    // Options are specified in the section below for openURL options. An empty options dictionary will result in the same
-    // behavior as the older openURL call, aside from the fact that this is asynchronous and calls the completion handler rather
-    // than returning a result.
-    // The completion handler is called on the main queue.
-//    @available(iOS 10.0, *)
-//    open func open(_ url: URL, options: [String : Any] = [:], completionHandler completion: ((Bool) -> Swift.Void)? = nil)
-
     
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         if control == view.rightCalloutAccessoryView {
@@ -119,9 +103,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
 }
 
+
+// MARK: delegate method, refresh Map
 extension MapViewController : RefreshTab {
     func refresh() {
-        print("$$$   delegate method refresh got called,current VC: is \(self)")
+        print("$$$   delegate method refresh in mapView got called,current VC: is \(self)")
         performUIUpdatesOnMain {
             print("&&&&    delegat method refresh in MapVC got call ")
             //        mapView.reloadInputViews()

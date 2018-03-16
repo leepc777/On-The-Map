@@ -21,6 +21,10 @@ class LoginViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        nameTextField.placeholder = "User Email"
+        nameTextField.keyboardType = UIKeyboardType.emailAddress
+        nameTextField.autocorrectionType = UITextAutocorrectionType.yes
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -76,7 +80,8 @@ class LoginViewController: UIViewController {
         MapClient.sharedInstance().login(userName: "leepc777@gmail.com", passWord: "2114550a") {(success,errorString)->Void in
 
             performUIUpdatesOnMain {
-                self.activityIndicator.stopAnimating()
+                
+                self.activityIndicator.stopAnimating() //stop indicator
                 UIApplication.shared.endIgnoringInteractionEvents()
 
                 if success {

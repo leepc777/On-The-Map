@@ -20,10 +20,10 @@ class MapClientData : NSObject {
 
     // students info (100 students)
     var studentLocations : [Student]!
-    
+    var studentlocationsClass : [StudentClass]!
     // filtered data for the table view after searching
     var filteredDataNew:[Student]!
-
+    
     
     // user info ( one person )
     var userInfo = Personal()
@@ -38,3 +38,4 @@ class MapClientData : NSObject {
     }
 
 }
+

@@ -25,6 +25,14 @@ class AddPinsViewController: UIViewController,UITextFieldDelegate,MKMapViewDeleg
         super.viewDidLoad()
         addressTextField.delegate = self
         urlTextField.delegate = self
+        
+        addressTextField.keyboardType = UIKeyboardType.alphabet
+        addressTextField.autocorrectionType = UITextAutocorrectionType.yes
+        
+        urlTextField.keyboardType = UIKeyboardType.URL
+        urlTextField.autocorrectionType = UITextAutocorrectionType.yes
+
+        
     }
 
     // Action for searching
@@ -49,7 +57,6 @@ class AddPinsViewController: UIViewController,UITextFieldDelegate,MKMapViewDeleg
             // stop indicator after getting Placemarks/error in closure
             self.activityIndicator.stopAnimating()
             UIApplication.shared.endIgnoringInteractionEvents()
-            
             guard
                 let placemarks = placemarks,
                 let location = placemarks.first?.location
@@ -58,6 +65,8 @@ class AddPinsViewController: UIViewController,UITextFieldDelegate,MKMapViewDeleg
                     self.showAlert(title: "Failed to find the location", message: "\(error!)")
                     return
             }
+            print("%%%%  CLGeocoder() return the placemarks: \(placemarks),\(location)")
+
             self.mapView.removeAnnotations(self.mapView.annotations)
             var annotations : [MKPointAnnotation] = []
             self.newInfo.lat = location.coordinate.latitude
@@ -165,7 +174,7 @@ class AddPinsViewController: UIViewController,UITextFieldDelegate,MKMapViewDeleg
             alert.dismiss(animated: true, completion: nil)
         }))
         
-        //Update button
+        //Update button : to store personal info back to cloud
         alert.addAction(UIAlertAction(title: "Update", style: UIAlertActionStyle.default, handler: { (actionHandler) in
             
             self.activityIndicator.startAnimating()
@@ -203,7 +212,7 @@ class AddPinsViewController: UIViewController,UITextFieldDelegate,MKMapViewDeleg
     }
 
     deinit {
-        print("&&&&&  AddPinsViewController got delocated  ")
+        print("&&&&&  AddPinsViewController got deallocated  ")
     }
 
 }
